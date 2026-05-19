@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Task Manager Dashboard</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 700px; margin: 40px auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        h2 { text-align: center; color: #2c3e50; margin-bottom: 30px; }
+        .task-form { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px; background: #f8f9fa; padding: 15px; border-radius: 8px; border: 1px solid #e9ecef; }
+        .task-form input[type="text"] { flex: 1; min-width: 200px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .task-form select, .task-form input[type="date"] { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .task-form button { background-color: #2ecc71; color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; transition: 0.2s; }
+        .task-form button:hover { background-color: #27ae60; }
+        .task-list { list-style: none; padding: 0; }
+        .task-item { display: flex; justify-content: space-between; align-items: center; padding: 15px; border-bottom: 1px solid #edf2f7; transition: 0.2s; }
+        .task-item:hover { background-color: #fcfdfd; }
+        .task-details { display: flex; flex-direction: column; gap: 5px; }
+        .task-title { font-size: 16px; font-weight: 500; }
+        .completed .task-title { text-decoration: line-through; color: #a0aec0; }
+        .badge { display: inline-block; padding: 3px 8px; font-size: 12px; border-radius: 4px; color: white; font-weight: bold; width: fit-content; text-transform: capitalize; }
+        .badge-high { background-color: #e74c3c; }
+        .badge-medium { background-color: #f1c40f; color: #333; }
+        .badge-low { background-color: #3498db; }
+        .due-date { font-size: 12px; color: #718096; }
+        .actions { display: flex; gap: 8px; }
+        .btn { padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; cursor: pointer; border: none; }
+        .btn-toggle { background-color: #edf2f7; color: #4a5568; }
+        .btn-toggle:hover { background-color: #e2e8f0; }
+        .btn-delete { background-color: #fed7d7; color: #c53030; }
+        .btn-delete:hover { background-color: #feb2b2; }
+        .empty-state { text-align: center; color: #718096; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Smart Task Manager Dashboard 🚀</h2>
+
+    <form method="POST" class="task-form">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Add a new task here..." required>
+        
+        <select name="priority">
+            <option value="low">Low</option>
+            <option value="medium" selected>Medium</option>
+            <option value="high">High</option>
+        </select>
+
+        <input type="date" name="due_date">
+        
+        <button type="submit">Add Task</button>
+    </form>
+
+    <ul class="task-list">
+        {% for task in tasks %}
+            <li class="task-item {% if task.completed %}completed{% endif %}">
+                <div class="task-details">
+                    <span class="task-title">{{ task.title }}</span>
+                    <div>
+                        <span class="badge badge-{{ task.priority }}">{{ task.get_priority_display }}</span>
+                        {% if task.due_date %}
+                            <span class="due-date">📅 Due: {{ task.due_date }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="actions">
+                    <a href="{% url 'toggle_task' task.pk %}" class="btn btn-toggle">
+                        {% if task.completed %} Undo ↩️ {% else %} Complete ✅ {% endif %}
+                    </a>
+                    <a href="{% url 'delete_task' task.pk %}" class="btn btn-delete">Delete ❌</a>
+                </div>
+            </li>
+        {% empty %}
+            <p class="empty-state">No tasks available. Start by adding your first task!</p>
+        {% endfor %}
+    </ul>
+</div>
+
+</body>
+</html>
